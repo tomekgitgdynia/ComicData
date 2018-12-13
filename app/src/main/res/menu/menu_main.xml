@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.marvel.developer.comicdata.MainActivity">
+
+    <item android:id="@+id/someHero"
+        android:title="Hulk #50"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/hulk"
+        android:title="Hulk #53"
+        app:showAsAction="never" />
+
+    <item android:id="@+id/venom"
+        android:title="Venom #24"
+        app:showAsAction="never" />
+
+</menu>

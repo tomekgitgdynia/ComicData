@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">Comic Books</string>
+    <string name="title">Title:</string>
+    <string name="price">Price:</string>
+    <string name="by">By:</string>
+    <string name="released">Released:</string>
+    <string name="pages">Pages:</string>
+    <string name="summary">Summary</string>
+
+</resources>
