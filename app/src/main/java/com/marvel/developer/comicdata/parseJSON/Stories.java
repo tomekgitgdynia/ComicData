@@ -1,20 +1,20 @@
-package com.marvel.developer.comicdata.network.parseJSON;
+package com.marvel.developer.comicdata.parseJSON;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class Events {
+public class Stories {
 
     private Integer available;
     private String collectionURI;
-    private List<Object> items = new ArrayList<Object>();
+    private List<ItemB> items = new ArrayList<ItemB>();
     private Integer returned;
 
     /**
      * No args constructor for use in serialization
      *
      */
-    public Events() {
+    public Stories() {
     }
 
     /**
@@ -24,7 +24,7 @@ public class Events {
      * @param available
      * @param returned
      */
-    public Events(Integer available, String collectionURI, List<Object> items, Integer returned) {
+    public Stories(Integer available, String collectionURI, List<ItemB> items, Integer returned) {
         super();
         this.available = available;
         this.collectionURI = collectionURI;
@@ -48,11 +48,11 @@ public class Events {
         this.collectionURI = collectionURI;
     }
 
-    public List<Object> getItems() {
+    public List<ItemB> getItems() {
         return items;
     }
 
-    public void setItems(List<Object> items) {
+    public void setItems(List<ItemB> items) {
         this.items = items;
     }
 

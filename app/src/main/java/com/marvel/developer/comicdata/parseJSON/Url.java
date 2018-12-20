@@ -1,4 +1,4 @@
-package com.marvel.developer.comicdata.network.parseJSON;
+package com.marvel.developer.comicdata.parseJSON;
 
 
 public class Url {

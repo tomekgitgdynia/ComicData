@@ -5,23 +5,35 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
-import android.net.Uri;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.text.method.ScrollingMovementMethod;
+import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.ViewFlipper;
 
-import com.marvel.developer.comicdata.network.BookResponse;
+import com.marvel.developer.comicdata.data.AttributeListItem;
+import com.marvel.developer.comicdata.data.BookResponse;
 import com.marvel.developer.comicdata.network.GetBookIntentService;
+import com.squareup.picasso.LruCache;
+import com.squareup.picasso.MemoryPolicy;
+import com.squareup.picasso.NetworkPolicy;
 import com.squareup.picasso.Picasso;
+
 
 import java.util.ArrayList;
 
@@ -35,31 +47,20 @@ public class MainActivity extends AppCompatActivity {
     public static final String NO_WIFI = "No WiFi";
     public static final String NO_ERRORS = "No Errors";
 
+    // Default comic allowing to show something if all else fails.  For demo app only.
     public static final String DEFAULT_COMIC = "40632";
-
-    private ImageView thumbImageView = null;
-    private TextView titleLabel = null;
-    private TextView titleTextView = null;
-    private TextView priceLabel = null;
-    private TextView priceTextView = null;
-
-    private TextView byLabel = null;
-    private TextView byTextView = null;
-
-    private TextView releasedLabel = null;
-    private TextView releasedTextView = null;
-
-    private TextView pagesLabel = null;
-    private TextView pagesTextView = null;
-
-    private TextView descriptionLabel = null;
+    private Button priceButton = null;
     private TextView descriptionTextView = null;
 
-    private RecyclerView recyclerView;
-    private ImageListRVadapter imageListRVadapter;
+    private RecyclerView attributesRecyclerView;
+    private AttributesRVadapter attributesRVadapter;
 
     private BookResponseReceiver bookResponseReceiver = new BookResponseReceiver();
     private BookResponse bookResponse = null;
+
+    ViewFlipper viewFlipper;
+    Toolbar toolbar;
+    Picasso picasso = null;
 
     private static int oldConfigInt;
 
@@ -67,35 +68,43 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        picasso = Picasso.with(MainActivity.this);
+        picasso.setIndicatorsEnabled(true);
+
+        Display display = ((WindowManager) getSystemService(WINDOW_SERVICE)).getDefaultDisplay();
+        DisplayMetrics metrics = new DisplayMetrics();
+        display.getMetrics(metrics);
+
+        int height = metrics.heightPixels;
+        int width = metrics.widthPixels;
+
+        if(width > height)
+        {
+            setContentView(R.layout.activity_main_horizontal);
+        } else
+        {
+            setContentView(R.layout.activity_main);
+        }
+
+        toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        thumbImageView = findViewById(R.id.thumbImage);
+        // Price button is placed overlapping image on purpose as part of a design.
+        priceButton = findViewById(R.id.price_button);
 
-        titleLabel = findViewById(R.id.titleLabel);
-        titleTextView = findViewById(R.id.titleTextView);
-        priceLabel = findViewById(R.id.priceLabel);
-        priceTextView = findViewById(R.id.priceTextView);
-
-        byLabel = findViewById(R.id.byLabel);
-        byTextView = findViewById(R.id.byTextView);
-
-        releasedLabel = findViewById(R.id.releasedLabel);
-        releasedTextView = findViewById(R.id.releasedTextView);
-
-        pagesLabel = findViewById(R.id.pagesLabel);
-        pagesTextView = findViewById(R.id.pagesTextView);
-
-        descriptionLabel = findViewById(R.id.descriptionLabel);
         descriptionTextView = findViewById(R.id.descriptionTextView);
+        descriptionTextView.setMovementMethod(new ScrollingMovementMethod());
 
-        recyclerView = findViewById(R.id.my_recycler_view);
-        RecyclerView.LayoutManager recyclerLayoutManager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.HORIZONTAL, false);
-        recyclerView.setLayoutManager(recyclerLayoutManager);
-        recyclerView.setHasFixedSize(true);
+        attributesRecyclerView = findViewById(R.id.attributes_recycler_view);
+        RecyclerView.LayoutManager recyclerLayoutManager = new LinearLayoutManager(MainActivity.this, LinearLayoutManager.VERTICAL, false);
+        attributesRecyclerView.setLayoutManager(recyclerLayoutManager);
+        attributesRecyclerView.addItemDecoration(new SimpleDividerItemDecoration(MainActivity.this));
+        attributesRecyclerView.setHasFixedSize(true);
 
+        viewFlipper = (ViewFlipper) findViewById(R.id.view_flipper);
+
+        // Handling orientation changes and starting point (displaying default inage).
         if ((oldConfigInt & ActivityInfo.CONFIG_ORIENTATION) == ActivityInfo.CONFIG_ORIENTATION) {
             // Orientation changed
             if (savedInstanceState != null) {
@@ -121,6 +130,15 @@ public class MainActivity extends AppCompatActivity {
                 onItemSelected(DEFAULT_COMIC);
             }
         }
+
+
+        viewFlipper.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View arg0) {
+
+                viewFlipper.showNext();
+
+            }
+        });
     }
 
 
@@ -153,6 +171,8 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
+        // Some temporary hardcoded book numbers.  For demo only as there is no
+        // comic book list activity, only detail
         if (id == R.id.someHero) {
             onItemSelected("40638");
             return true;
@@ -171,7 +191,6 @@ public class MainActivity extends AppCompatActivity {
     public void onResume() {
         super.onResume();
         registerReceiver(bookResponseReceiver, new IntentFilter(GetBookIntentService.BOOK_RESPONSE_ACTION));
-
     }
 
     @Override
@@ -188,66 +207,99 @@ public class MainActivity extends AppCompatActivity {
 
     private void refillFromBookResponse() {
         if (bookResponse != null && bookResponse.getResultString().equals(MainActivity.NO_ERRORS)) {
-            Uri imageUri = Uri.parse(bookResponse.getImageUrl());
-            Picasso.with(MainActivity.this).load(imageUri).placeholder(R.drawable.marvel_icon).fit().centerCrop().into(thumbImageView);
 
-            titleTextView.setText(bookResponse.getTitle());
-            priceTextView.setText(bookResponse.getPrice());
+            // Sets the title to the comic name as this is the comic detail activity
+            // Placing title in the tool bar saves space in the body of the app
+            toolbar.setTitle(bookResponse.getTitle());
 
-            byTextView.setText(bookResponse.getWrittenBy());
-            releasedTextView.setText(bookResponse.getReleaseDate());
-            pagesTextView.setText(bookResponse.getNumberOfPages());
+            // Some quick editing of the purchase button.  The $ sign should be localized.
+            priceButton.setText("$" + bookResponse.getPrice());
 
+            // The description of the comic has its own text box
             descriptionTextView.setText(bookResponse.getDescription());
-            if (imageListRVadapter == null) {
-                imageListRVadapter = new ImageListRVadapter(bookResponse.getPreviewImageUrls());
-                recyclerView.setAdapter(imageListRVadapter);
-            } else {
-                imageListRVadapter = new ImageListRVadapter(bookResponse.getPreviewImageUrls());
-                recyclerView.setAdapter(imageListRVadapter);
-                imageListRVadapter.notifyDataSetChanged();
+
+            // Set up the adapter to display attributes like dates, contributors etc.
+            attributesRVadapter = new AttributesRVadapter(bookResponse.getAttributeItemList());
+            attributesRecyclerView.setAdapter(attributesRVadapter);
+            attributesRVadapter.notifyDataSetChanged();
+
+            // Place images in the main image box on top.  Urls are retrieved from the
+            // response and the Picasso handles each of the images loading and caching
+            viewFlipper.removeAllViews();
+            for (String urlString : bookResponse.getPreviewImageUrls()) {
+                ImageView image = new ImageView(getApplicationContext());
+                picasso.load(urlString).placeholder(R.drawable.marvel_icon).fit().into(image);
+                viewFlipper.addView(image);
+            }
+
+        }
+    }
+
+    // This is to draw a divider between attributes rows
+    public class SimpleDividerItemDecoration extends RecyclerView.ItemDecoration {
+        private Drawable mDivider;
+
+        public SimpleDividerItemDecoration(Context context) {
+            mDivider = context.getResources().getDrawable(R.drawable.line_divider);
+        }
+
+        @Override
+        public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
+            int left = parent.getPaddingLeft() + 10;
+            int right = parent.getWidth() - parent.getPaddingRight() - 10;
+            int childCount = parent.getChildCount();
+
+            for (int i = 0; i < childCount; i++) {
+                View child = parent.getChildAt(i);
+
+                RecyclerView.LayoutParams params = (RecyclerView.LayoutParams) child.getLayoutParams();
+                int top = child.getBottom() + params.bottomMargin;
+                int bottom = top + mDivider.getIntrinsicHeight();
+
+                mDivider.setBounds(left, top, right, bottom);
+                mDivider.setAlpha(100);
+                mDivider.draw(c);
             }
         }
     }
 
-    // Adapter for the recycler view that displays the list of preview pages from the comic book
-    class ImageListRVadapter extends RecyclerView.Adapter<ImageListItemVH> {
-        ArrayList<String> imageList;
-        private ImageListItemVH viewHolder;
+    class AttributesRVadapter extends RecyclerView.Adapter<AttributesItemVH> {
+        ArrayList<AttributeListItem> attributesList;
+        private AttributesItemVH viewHolder;
 
-        public ImageListRVadapter(ArrayList<String> list) {
+        public AttributesRVadapter(ArrayList<AttributeListItem> attributesList) {
 
-            this.imageList = list;
+            this.attributesList = attributesList;
         }
 
         @Override
-        public ImageListItemVH onCreateViewHolder(ViewGroup parent, int viewType) {
+        public AttributesItemVH onCreateViewHolder(ViewGroup parent, int viewType) {
 
-            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.image_item_preview, parent, false);
-            return new ImageListItemVH(view);
+            View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.attribute_item, parent, false);
+            return new AttributesItemVH(view);
 
         }
 
         @Override
-        public void onBindViewHolder(ImageListItemVH holder, int position) {
+        public void onBindViewHolder(AttributesItemVH holder, int position) {
 
             viewHolder = holder;
-            String imagePath = this.imageList.get(position);
-            Uri uri = Uri.parse(imagePath);
-            Context context = holder.itemView.getContext();
-            Picasso.with(context).load(uri).into(viewHolder.previewImage);
+
+            viewHolder.attributeNameTV.setText(attributesList.get(position).getAttributeName());
+            viewHolder.attributeValueTV.setText(attributesList.get(position).getAttributeValue());
         }
 
         @Override
         public int getItemCount() {
-            return this.imageList.size();
+            return this.attributesList.size();
+
         }
 
-        public void setItems(ArrayList<String> list) {
-            this.imageList = list;
+        public void setItems(ArrayList<AttributeListItem> list) {
+            this.attributesList = list;
         }
 
-        public ImageListItemVH getViewHolder() {
+        public AttributesItemVH getViewHolder() {
             return viewHolder;
         }
     }
@@ -256,20 +308,28 @@ public class MainActivity extends AppCompatActivity {
      *
      *
      */
-    private class ImageListItemVH extends RecyclerView.ViewHolder {
+    private class AttributesItemVH extends RecyclerView.ViewHolder {
 
-        public ImageView previewImage;
+        public String attributeName;
+        public String attributeValue;
+
+        TextView attributeNameTV = null;
+        TextView attributeValueTV = null;
+
         public View itemView;
 
-        public ImageListItemVH(View itemView) {
+        public AttributesItemVH(View itemView) {
             super(itemView);
 
             this.itemView = itemView;
-            previewImage = itemView.findViewById(R.id.previewImage);
+
+            attributeNameTV = (TextView) itemView.findViewById(R.id.attribute_name_text_view);
+            attributeValueTV = (TextView) itemView.findViewById(R.id.attribute_value_text_view);
+
         }
     }
 
-
+    // The Intent Service receiver with book response data passed inside Intent as Parcelable
     public class BookResponseReceiver extends BroadcastReceiver {
 
         @Override

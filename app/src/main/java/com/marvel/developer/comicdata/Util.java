@@ -1,4 +1,4 @@
-package com.marvel.developer.comicdata.network;
+package com.marvel.developer.comicdata;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;

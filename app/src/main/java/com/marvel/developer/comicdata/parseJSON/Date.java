@@ -1,27 +1,27 @@
-package com.marvel.developer.comicdata.network.parseJSON;
+package com.marvel.developer.comicdata.parseJSON;
 
 
-public class Price {
+public class Date {
 
     private String type;
-    private Float price;
+    private String date;
 
     /**
      * No args constructor for use in serialization
      *
      */
-    public Price() {
+    public Date() {
     }
 
     /**
      *
-     * @param price
+     * @param date
      * @param type
      */
-    public Price(String type, Float price) {
+    public Date(String type, String date) {
         super();
         this.type = type;
-        this.price = price;
+        this.date = date;
     }
 
     public String getType() {
@@ -32,12 +32,12 @@ public class Price {
         this.type = type;
     }
 
-    public Float getPrice() {
-        return price;
+    public String getDate() {
+        return date;
     }
 
-    public void setPrice(Float price) {
-        this.price = price;
+    public void setDate(String date) {
+        this.date = date;
     }
 
 }

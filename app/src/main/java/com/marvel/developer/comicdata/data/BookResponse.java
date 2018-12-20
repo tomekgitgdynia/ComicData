@@ -1,4 +1,4 @@
-package com.marvel.developer.comicdata.network;
+package com.marvel.developer.comicdata.data;
 
 
 import android.os.Parcel;
@@ -6,19 +6,16 @@ import android.os.Parcelable;
 
 import java.util.ArrayList;
 
-public class BookResponse  implements Parcelable
+
+public class BookResponse implements Parcelable
 {
 
     private String id;
     private String title;
     private String price;
-    private String writtenBy;
-    private String artBy;
-    private String releaseDate;
-    private String numberOfPages;
     private String description;
-    private String copyRight;
     private String imageUrl;
+    private ArrayList<AttributeListItem> attributeItemList = new ArrayList<>();
     private ArrayList<String> previewImageUrls = new ArrayList<>();
 
     private String resultString;
@@ -28,21 +25,16 @@ public class BookResponse  implements Parcelable
      *
      */
     public BookResponse(){
-        super();
 
     }
 
-    protected BookResponse(Parcel in) {
+    public BookResponse(Parcel in) {
         id = in.readString();
         title = in.readString();
         price = in.readString();
-        writtenBy = in.readString();
-        artBy = in.readString();
-        releaseDate = in.readString();
-        numberOfPages = in.readString();
         description = in.readString();
-        copyRight = in.readString();
         imageUrl = in.readString();
+        attributeItemList = in.createTypedArrayList(AttributeListItem.CREATOR);
         previewImageUrls = in.createStringArrayList();
         resultString = in.readString();
 
@@ -100,46 +92,6 @@ public class BookResponse  implements Parcelable
         this.price = price;
     }
 
-    public String getWrittenBy() {
-        return writtenBy;
-    }
-
-    public void setWrittenBy(String writtenBy) {
-        this.writtenBy = writtenBy;
-    }
-
-    public String getArtBy() {
-        return artBy;
-    }
-
-    public void setArtBy(String artBy) {
-        this.artBy = artBy;
-    }
-
-    public String getReleaseDate() {
-        return releaseDate;
-    }
-
-    public void setReleaseDate(String releaseDate) {
-        this.releaseDate = releaseDate;
-    }
-
-    public String getNumberOfPages() {
-        return numberOfPages;
-    }
-
-    public void setNumberOfPages(String numberOfPages) {
-        this.numberOfPages = numberOfPages;
-    }
-
-    public String getCopyRight() {
-        return copyRight;
-    }
-
-    public void setCopyRight(String copyRight) {
-        this.copyRight = copyRight;
-    }
-
     public String getImageUrl() {
         return imageUrl;
     }
@@ -155,19 +107,17 @@ public class BookResponse  implements Parcelable
 
     @Override
     public void writeToParcel(Parcel parcel, int i) {
+
         parcel.writeString(id);
         parcel.writeString(title);
         parcel.writeString(price);
-        parcel.writeString(writtenBy);
-        parcel.writeString(artBy);
-        parcel.writeString(releaseDate);
-        parcel.writeString(numberOfPages);
         parcel.writeString(description);
-        parcel.writeString(copyRight);
         parcel.writeString(imageUrl);
+        parcel.writeTypedList(attributeItemList);
         parcel.writeStringList(previewImageUrls);
         parcel.writeString(resultString);
     }
+
 
     public ArrayList<String> getPreviewImageUrls() {
         return previewImageUrls;
@@ -175,5 +125,13 @@ public class BookResponse  implements Parcelable
 
     public void setPreviewImageUrls(ArrayList<String> previewImageUrls) {
         this.previewImageUrls = previewImageUrls;
+    }
+
+    public ArrayList<AttributeListItem> getAttributeItemList() {
+        return attributeItemList;
+    }
+
+    public void setAttributeItemList(ArrayList<AttributeListItem> attributeItemList) {
+        this.attributeItemList = attributeItemList;
     }
 }

@@ -8,14 +8,17 @@ import android.net.ConnectivityManager;
 
 import com.google.gson.Gson;
 import com.marvel.developer.comicdata.MainActivity;
-import com.marvel.developer.comicdata.network.parseJSON.Creators;
-import com.marvel.developer.comicdata.network.parseJSON.Data;
-import com.marvel.developer.comicdata.network.parseJSON.Date;
-import com.marvel.developer.comicdata.network.parseJSON.Image;
-import com.marvel.developer.comicdata.network.parseJSON.Item;
-import com.marvel.developer.comicdata.network.parseJSON.JsonBody;
-import com.marvel.developer.comicdata.network.parseJSON.Price;
-import com.marvel.developer.comicdata.network.parseJSON.Result;
+import com.marvel.developer.comicdata.Util;
+import com.marvel.developer.comicdata.data.AttributeListItem;
+import com.marvel.developer.comicdata.data.BookResponse;
+import com.marvel.developer.comicdata.parseJSON.Creators;
+import com.marvel.developer.comicdata.parseJSON.Data;
+import com.marvel.developer.comicdata.parseJSON.Date;
+import com.marvel.developer.comicdata.parseJSON.Image;
+import com.marvel.developer.comicdata.parseJSON.Item;
+import com.marvel.developer.comicdata.parseJSON.JsonBody;
+import com.marvel.developer.comicdata.parseJSON.Price;
+import com.marvel.developer.comicdata.parseJSON.Result;
 
 
 import java.util.List;
@@ -116,36 +119,43 @@ public class GetBookIntentService extends IntentService {
                 bookResponse.setPrice(String.valueOf(price.getPrice()));
             }
 
-
             // Creators
             Creators creators = result.getCreators();
             List<Item> items = creators.getItems();
-            StringBuilder sBuilder = new StringBuilder();
+
             if(items != null && items.size() > 0)
             {
                 for(Item item: items)
                 {
-                    sBuilder = sBuilder.append(item.getName() + ",");
+                    String roleCaps = item.getRole().substring(0, 1).toUpperCase() + item.getRole().substring(1);
+                    AttributeListItem creatorItem = new AttributeListItem(roleCaps, item.getName());
+                    bookResponse.getAttributeItemList().add(creatorItem);
                 }
-                sBuilder.deleteCharAt(sBuilder.lastIndexOf(","));
             }
 
-            bookResponse.setWrittenBy(sBuilder.toString());
-
-            // Release date
-            Date releaseDate = result.getDates().get(ON_SALE_DATE_OFFSET);
-            String stringDate = releaseDate.getDate();
-            stringDate = stringDate.split("T")[0];
-            bookResponse.setReleaseDate(stringDate);
+            List<Date> datesItems = result.getDates();
+            if(items != null && items.size() > 0)
+            {
+                for(Date dateItem: datesItems)
+                {
+                    String stringDate = dateItem.getDate();
+                    stringDate = stringDate.split("T")[0];
+                    String dateCaps = dateItem.getType().substring(0, 1).toUpperCase() + dateItem.getType().substring(1);
+                    AttributeListItem attributeListItem = new AttributeListItem(dateCaps, stringDate);
+                    bookResponse.getAttributeItemList().add(attributeListItem);
+                }
+            }
 
             // Page count
-            bookResponse.setNumberOfPages(result.getPageCount().toString());
+            AttributeListItem attributeListItem = new AttributeListItem("Pages", result.getPageCount().toString());
+            bookResponse.getAttributeItemList().add(attributeListItem);
 
             // Summary
             bookResponse.setDescription(result.getDescription());
 
             // Copyright
-            bookResponse.setCopyRight(body.getCopyright());
+            attributeListItem = new AttributeListItem("Copyright", body.getCopyright());
+            bookResponse.getAttributeItemList().add(attributeListItem);
 
             bookResponse.setResultString(MainActivity.NO_ERRORS);
         } else {

@@ -1,23 +1,10 @@
 package com.marvel.developer.comicdata;
 
-import android.app.IntentService;
-import android.content.Context;
-import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.support.annotation.Nullable;
-
 import com.google.gson.Gson;
-import com.marvel.developer.comicdata.network.BookResponse;
-import com.marvel.developer.comicdata.network.ConnectClient;
-import com.marvel.developer.comicdata.network.Util;
-import com.marvel.developer.comicdata.network.parseJSON.Creators;
-import com.marvel.developer.comicdata.network.parseJSON.Data;
-import com.marvel.developer.comicdata.network.parseJSON.Date;
-import com.marvel.developer.comicdata.network.parseJSON.Image;
-import com.marvel.developer.comicdata.network.parseJSON.Item;
-import com.marvel.developer.comicdata.network.parseJSON.JsonBody;
-import com.marvel.developer.comicdata.network.parseJSON.Price;
-import com.marvel.developer.comicdata.network.parseJSON.Result;
+import com.marvel.developer.comicdata.data.BookResponse;
+import com.marvel.developer.comicdata.parseJSON.Data;
+import com.marvel.developer.comicdata.parseJSON.JsonBody;
+import com.marvel.developer.comicdata.parseJSON.Result;
 
 import org.junit.Test;
 

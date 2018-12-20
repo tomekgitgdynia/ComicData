@@ -1,31 +1,31 @@
-package com.marvel.developer.comicdata.network.parseJSON;
+package com.marvel.developer.comicdata.parseJSON;
 
 
-// Item for Creators class
-public class Item {
+// Item for class Stories
+public class ItemB {
 
     private String resourceURI;
     private String name;
-    private String role;
+    private String type;
 
     /**
      * No args constructor for use in serialization
      *
      */
-    public Item() {
+    public ItemB() {
     }
 
     /**
      *
      * @param resourceURI
      * @param name
-     * @param role
+     * @param type
      */
-    public Item(String resourceURI, String name, String role) {
+    public ItemB(String resourceURI, String name, String type) {
         super();
         this.resourceURI = resourceURI;
         this.name = name;
-        this.role = role;
+        this.type = type;
     }
 
     public String getResourceURI() {
@@ -44,12 +44,12 @@ public class Item {
         this.name = name;
     }
 
-    public String getRole() {
-        return role;
+    public String getType() {
+        return type;
     }
 
-    public void setRole(String role) {
-        this.role = role;
+    public void setType(String type) {
+        this.type = type;
     }
 
 }
